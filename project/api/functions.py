@@ -16,8 +16,7 @@ async def get_user_social_networks(
     query = select(User).where(
         User.id == user_id
     ).options(
-        selectinload(User.youtube),
-        selectinload(User.vk)
+        selectinload(User.social_networks)
     )
     result = await session.execute(query)
     user = result.scalar()
@@ -32,18 +31,10 @@ async def get_user_social_networks(
 
 
 async def return_user_social_networks(user: User):
-    youtube = [
+    social_networks = [
         SocialNetworkResponce.from_orm(
-            model=youtube,
-            title_network="youtube"
-        ) for youtube in user.youtube
+            model=sn,
+        ) for sn in user.social_networks
     ]
 
-    vk = [
-        SocialNetworkResponce.from_orm(
-            model=vk,
-            title_network="vk"
-        ) for vk in user.vk
-    ]
-
-    return youtube + vk
+    return social_networks

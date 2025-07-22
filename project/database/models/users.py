@@ -14,11 +14,8 @@ class User(Model):
     first_name: Mapped[str] = mapped_column(String(50))
     last_name: Mapped[str] = mapped_column(String(50))
     manual_update: Mapped[bool] = mapped_column(Boolean, default=False)
-    youtube = relationship(
-        "YouTube", back_populates="user"
-    )
-    vk = relationship(
-        "VK", back_populates="user"
+    social_networks = relationship(
+        "SocialNetwork", back_populates="user"
     )
     is_admin: Mapped[bool] = mapped_column(Boolean, default=False)
 

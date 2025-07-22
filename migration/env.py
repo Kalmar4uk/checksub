@@ -6,10 +6,9 @@ from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
-from project.database.models import (VK, BaseRefreshToken, BaseSocialNetword,
+from project.database.models import (BaseRefreshToken, SocialNetwork,
                                      BlackListAccessToken,
-                                     BlackListRefreshToken, Model, User,
-                                     YouTube)
+                                     BlackListRefreshToken, Model, User)
 from project.database.settings import DATABASE_URL
 
 config = context.config

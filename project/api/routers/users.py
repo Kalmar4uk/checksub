@@ -55,8 +55,7 @@ async def get_users(
     current_user: User = Depends(get_current_user)
 ):
     query = select(User).options(
-        selectinload(User.youtube),
-        selectinload(User.vk)
+        selectinload(User.social_networks)
     )
     users = await session.execute(query)
 

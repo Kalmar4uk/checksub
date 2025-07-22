@@ -1,5 +1,5 @@
 from .core import Model
-from .social_network import VK, BaseSocialNetword, YouTube
+from .social_network import SocialNetwork
 from .tokens import (BaseRefreshToken, BlackListAccessToken,
                      BlackListRefreshToken, RefreshToken)
 from .users import User
@@ -7,7 +7,7 @@ from .users import User
 __all__ = [
     "Model",
     "User",
-    "BaseSocialNetword",
+    "BaseSocialNetwork",
     "YouTube",
     "VK",
     "BaseRefreshToken",
