@@ -1,4 +1,4 @@
-from project.database.models import Model
+from database.models import Model
 from passlib.context import CryptContext
 from sqlalchemy import Boolean, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
