@@ -1,6 +1,6 @@
 from api.exceptions.error_404 import UserNotFound
 from api.pydantic_models.social_networks.response_models import \
-    SocialNetworkResponce
+    SocialNetworkResponse
 from api.pydantic_models.users.response_models import \
     UserResponseWithSocialNetwork
 from database.models.users import User
@@ -32,7 +32,7 @@ async def get_user_social_networks(
 
 async def return_user_social_networks(user: User):
     social_networks = [
-        SocialNetworkResponce.from_orm(
+        SocialNetworkResponse.from_orm(
             model=sn,
         ) for sn in user.social_networks
     ]

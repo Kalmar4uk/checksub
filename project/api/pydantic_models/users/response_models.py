@@ -1,6 +1,6 @@
 from api.pydantic_models.core import Base
 from api.pydantic_models.social_networks.response_models import \
-    SocialNetworkWithUser
+    SocialNetworkResponse
 from api.pydantic_models.users.base_models import BaseUser
 from pydantic import Field
 
@@ -25,7 +25,7 @@ class UserResponse(Base, BaseUser):
 
 class UserResponseWithSocialNetwork(UserResponse):
     """Модель для ответа пользователя с его социальными сетями"""
-    social_networks: list[SocialNetworkWithUser] | None
+    social_networks: list[SocialNetworkResponse] | None
 
 
 class UserResponseForSocialNetwork(Base):

@@ -1,10 +1,9 @@
 from api.pydantic_models.core import Base
 from api.pydantic_models.social_networks.base_models import BaseSocialNetwork
-from pydantic import Field
 
 
-class SocialNetworkWithUser(Base, BaseSocialNetwork):
-    """Модель социальной сети для ответа с пользователем"""
+class SocialNetworkResponse(Base, BaseSocialNetwork):
+    """Модель социальной сети для ответа"""
 
     @classmethod
     def from_orm(cls, model):
@@ -15,8 +14,3 @@ class SocialNetworkWithUser(Base, BaseSocialNetwork):
             followers_count=model.followers_count,
             likes_count=model.likes_count
         )
-
-
-class SocialNetworkResponce(SocialNetworkWithUser):
-    """Модель социальной сети для ответа"""
-    username_network: str = Field(examples=["puskacause"])
