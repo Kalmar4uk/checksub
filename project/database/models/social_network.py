@@ -13,8 +13,12 @@ class SocialNetwork(Model):
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     user = relationship("User", back_populates="social_networks")
     username_network: Mapped[str] = mapped_column(String(150))
-    followers_count: Mapped[int | None] = mapped_column(Integer, nullable=True)
-    likes_count: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    followers_count: Mapped[int | None] = mapped_column(
+        Integer, default=0, nullable=True
+    )
+    likes_count: Mapped[int | None] = mapped_column(
+        Integer, default=0, nullable=True
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime, server_default=func.now()
     )

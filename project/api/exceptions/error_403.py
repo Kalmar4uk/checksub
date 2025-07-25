@@ -9,9 +9,9 @@ class NotRights(HTTPException):
         )
 
 
-class NotRightsForUpdateSN(HTTPException):
+class NotRightsForUpdateDeleteSN(HTTPException):
     def __init__(self):
         super().__init__(
             status_code=403,
-            detail="Запрещено редактировать чужие соц. сети"
+            detail="Запрещено редактировать/удалять чужие соц. сети"
         )

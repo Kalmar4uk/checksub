@@ -1,5 +1,5 @@
-from pydantic import BaseModel, Field, field_validator
 from api.constants import TYPE_SN
+from pydantic import BaseModel, Field, field_validator
 
 
 class SocialNetworkForCreate(BaseModel):
