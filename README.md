@@ -32,7 +32,7 @@
    ```
    python -m venv venv
    source venv/bin/activate  # для Linux/MacOS
-   venv\Scripts\activate     # для Window
+   source venv\Scripts\activate     # для Window
    ```
 4. Установите зависимости:
    ```
