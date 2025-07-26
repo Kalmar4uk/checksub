@@ -1,4 +1,4 @@
-from database.models import Model
+from database.models import Model, UserSocialNetwork
 from passlib.context import CryptContext
 from sqlalchemy import Boolean, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -15,7 +15,9 @@ class User(Model):
     last_name: Mapped[str] = mapped_column(String(50))
     manual_update: Mapped[bool] = mapped_column(Boolean, default=False)
     social_networks = relationship(
-        "SocialNetwork", back_populates="user"
+        "SocialNetwork",
+        secondary=UserSocialNetwork.__table__,
+        back_populates="users"
     )
     refresh_token = relationship("RefreshToken", back_populates="user")
     black_list_refresh_token = relationship(

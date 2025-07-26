@@ -7,10 +7,12 @@ from api.pydantic_models.social_networks.request_models import \
 from api.pydantic_models.social_networks.response_models import \
     SocialNetworkResponse
 from api.routers.routers import router_social_network
+from database.models import UserSocialNetwork
 from database.models.social_network import SocialNetwork
 from database.models.users import User
 from database.settings import get_db
 from fastapi import Depends
+from sqlalchemy import select, exists
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -23,12 +25,30 @@ async def create_social_network(
 ):
     result = []
     for sn in form_data:
-        social_network = SocialNetwork(
-            type=sn.type,
-            username_network=sn.username_network,
-            user_id=current_user.id
+        query = await session.execute(
+            select(SocialNetwork).where(
+                SocialNetwork.username_network == sn.username_network
+            )
         )
-        session.add(social_network)
+        if not (social_network := query.scalar()):
+            social_network = SocialNetwork(
+                title=sn.title,
+                username_network=sn.username_network
+            )
+        check_association = await session.execute(
+            select(
+                exists().where(
+                    UserSocialNetwork.user_id == current_user.id,
+                    UserSocialNetwork.social_network_id == social_network.id
+                )
+            )
+        )
+        if not check_association.scalar():
+            association = UserSocialNetwork(
+                user_id=current_user.id,
+                social_network_id=social_network.id
+            )
+            session.add_all([association, social_network])
         result.append(social_network)
     try:
         await session.commit()
@@ -39,6 +59,10 @@ async def create_social_network(
     return [SocialNetworkResponse.from_orm(model=sn) for sn in result]
 
 
+# Пока под вопросом, нужно обсудить
+# Вероятно роут пойдет *****
+# На текущий момент не адаптирован под новую таблицу
+# Использование скорее всего даст ошибку
 @router_social_network.put(
         "/{social_network_id}",
         response_model=SocialNetworkResponse
@@ -64,6 +88,7 @@ async def update_social_network(
     return SocialNetworkResponse.from_orm(social_network)
 
 
+# Изменить удаление
 @router_social_network.delete("/{social_network_id}", status_code=204)
 async def delete_social_network(
     social_network: SocialNetwork = Depends(

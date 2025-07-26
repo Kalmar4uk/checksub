@@ -1,6 +1,6 @@
 TYPE_SN = [
-    "Y",
-    "V",
-    "TT",
-    "TW"
+    "YouTube",
+    "VK",
+    "TikTok",
+    "Twitch"
 ]

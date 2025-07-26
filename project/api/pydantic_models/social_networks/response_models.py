@@ -9,7 +9,7 @@ class SocialNetworkResponse(Base, BaseSocialNetwork):
     def from_orm(cls, model):
         return cls(
             id=model.id,
-            type=model.type,
+            title=model.title,
             username_network=model.username_network,
             followers_count=model.followers_count,
             likes_count=model.likes_count,

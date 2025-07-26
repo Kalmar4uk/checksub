@@ -4,20 +4,20 @@ from pydantic import BaseModel, Field, field_validator
 
 class SocialNetworkForCreate(BaseModel):
     """Модель для добавления социальной сети"""
-    type: str = Field(
+    title: str = Field(
         examples=["Y"],
         description=(
             "Поле принимает тип социальной сети "
-            "Y - YouTube, V - Vkontakte, TT - TikTok, TW - Twich")
+            "YouTube, VK, TikTok, Twitch")
     )
     username_network: str = Field(examples=["puskacause"])
 
-    @field_validator("type")
-    def check_type(value: str):
+    @field_validator("title")
+    def check_title(value: str):
         if value not in TYPE_SN:
             raise ValueError(
                 "Некорректный тип социальной сети. "
                 "Может быть только: "
-                "Y - YouTube, V - Vkontakte, TT - TikTok, TW - Twich"
+                "YouTube, VK, TikTok, Twitch"
             )
         return value
