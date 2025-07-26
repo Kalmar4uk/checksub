@@ -28,7 +28,7 @@ flowchart TD
  A[Клиент] -->|HTTP| B[FastAPI]
  B -->|Кеширование| C[(Redis)]
  B -->|Запись/Чтение| D[(PostgreSQL)]
- C -->|Кеш промах| B
+ C -->|Кеш| B
  B -->|Постановка задач| E[Celery Worker]
  E -->|Запросы| F[VK API]
  E -->|Запросы| G[YouTube API]
