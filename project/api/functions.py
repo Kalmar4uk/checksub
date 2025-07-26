@@ -1,3 +1,6 @@
+import json
+from datetime import datetime
+
 from api.auth import get_current_user
 from api.exceptions.error_404 import SocialNetworkNotFound, UserNotFound
 from api.exceptions.error_422 import CountFollowersOrLikesMoreZero
@@ -5,13 +8,19 @@ from api.pydantic_models.social_networks.response_models import \
     SocialNetworkResponse
 from api.pydantic_models.users.response_models import \
     UserResponseWithSocialNetwork
+from api.utils import get_redis
 from database.models.social_network import SocialNetwork
 from database.models.users import User
 from database.settings import get_db
 from fastapi import Depends
-from sqlalchemy import select
+from redis import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
+
+
+def encoder_datetime(obj):
+    if isinstance(obj, datetime):
+        return obj.isoformat()
+    return obj
 
 
 async def check_availability_social_network(
@@ -36,7 +45,7 @@ async def check_followers_or_likes_count(social_network: SocialNetwork):
 async def check_availability_user(
         user_id: int | None = None,
         session: AsyncSession = Depends(get_db),
-        current_user: User = Depends(get_current_user)
+        current_user: User = Depends(get_current_user),
 ):
     if user_id is None:
         return current_user
@@ -51,15 +60,29 @@ async def check_availability_user(
 
 async def get_user_social_networks(
         user: User = Depends(check_availability_user),
-        session: AsyncSession = Depends(get_db)
+        session: AsyncSession = Depends(get_db),
+        redis: Redis = Depends(get_redis)
 ):
+    cache_key = f"user:{user.id}:user_and_sn"
+    cache = redis.get(cache_key)
+    if cache:
+        return json.loads(cache)
+
     await session.refresh(user, ["social_networks"])
 
     social_networks = await return_user_social_networks(user=user)
 
-    return UserResponseWithSocialNetwork.from_orm(
+    result = UserResponseWithSocialNetwork.from_orm(
         model=user, social_networks=social_networks
     )
+
+    redis.setex(
+        cache_key,
+        3600,
+        json.dumps(result.model_dump(), default=encoder_datetime)
+    )
+
+    return result
 
 
 async def return_user_social_networks(user: User):

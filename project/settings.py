@@ -1,12 +1,13 @@
 import os
 import sys
+from pathlib import Path
 
 from api.routers import social_networks, tokens, users
 from api.routers.routers import (router_social_network, router_token,
                                  router_user)
 from dotenv import load_dotenv
-from pathlib import Path
 from fastapi import FastAPI
+from redis import ConnectionError, Redis
 
 load_dotenv()
 

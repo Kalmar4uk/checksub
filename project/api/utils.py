@@ -1,5 +1,6 @@
 from api.exceptions.error_422 import UniqueEmailEmployee
 from database.models import User
+from redis import ConnectionError, Redis
 from sqlalchemy import exists, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -50,3 +51,14 @@ async def check_unique_email(session: AsyncSession, email: str) -> None:
     )
     if query.scalar():
         raise UniqueEmailEmployee()
+
+
+def get_redis():
+    r = Redis(host='localhost', port=6379, db=0, decode_responses=True)
+
+    try:
+        r.ping()
+    except ConnectionError:
+        raise Exception("Не удалось подключиться к Redis")
+
+    return r

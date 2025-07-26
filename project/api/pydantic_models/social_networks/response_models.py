@@ -12,5 +12,6 @@ class SocialNetworkResponse(Base, BaseSocialNetwork):
             type=model.type,
             username_network=model.username_network,
             followers_count=model.followers_count,
-            likes_count=model.likes_count
+            likes_count=model.likes_count,
+            updated_at=model.updated_at
         )

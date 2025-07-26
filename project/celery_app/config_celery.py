@@ -1,10 +1,10 @@
 import os
 import sys
 from pathlib import Path
+
 from celery import Celery
 from celery.schedules import crontab
 from dotenv import load_dotenv
-
 
 load_dotenv()
 

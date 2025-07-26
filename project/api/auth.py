@@ -5,13 +5,13 @@ import settings
 from api.exceptions.error_401 import NotAuth, NotValidToken
 from api.exceptions.error_403 import NotRights
 from api.exceptions.error_404 import UserNotFound
-from database.models.users import User
 from database.models.tokens import BlackListAccessToken
+from database.models.users import User
 from database.settings import get_db
 from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer, SecurityScopes
 from jwt.exceptions import InvalidTokenError
-from sqlalchemy import select, exists
+from sqlalchemy import exists, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 oauth2_scheme = OAuth2PasswordBearer(

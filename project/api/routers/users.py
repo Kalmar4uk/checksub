@@ -1,7 +1,8 @@
 from api.auth import get_current_user
 from api.exceptions.error_500 import ExceptionSaveDataBase
 from api.functions import get_user_social_networks, return_user_social_networks
-from api.pydantic_models.users.request_models import UserCreate, UserPasswordRequest
+from api.pydantic_models.users.request_models import (UserCreate,
+                                                      UserPasswordRequest)
 from api.pydantic_models.users.response_models import (
     UserResponse, UserResponseWithSocialNetwork)
 from api.routers.routers import router_user

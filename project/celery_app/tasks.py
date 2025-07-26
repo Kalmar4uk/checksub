@@ -1,9 +1,9 @@
 import os
+
 from celery_app.config_celery import app
 from celery_app.functions import request_vk
 from database.models.social_network import SocialNetwork
-from sqlalchemy import select
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, select
 from sqlalchemy.orm import sessionmaker
 
 DATABASE_URL = (

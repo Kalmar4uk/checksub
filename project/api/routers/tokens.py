@@ -1,19 +1,22 @@
+from datetime import datetime, timedelta
+
 import settings
-from api.auth import get_access_and_refresh_tokens, oauth2_scheme, get_current_user
+from api.auth import (get_access_and_refresh_tokens, get_current_user,
+                      oauth2_scheme)
 from api.exceptions.error_401 import NotValidEmailOrPassword
 from api.exceptions.error_404 import UserNotFound
 from api.exceptions.error_500 import ExceptionSaveDataBase
 from api.pydantic_models.tokens.request_models import UserLogin
 from api.pydantic_models.tokens.response_models import TokenResponse
 from api.routers import router_token
+from database.models.tokens import (BlackListAccessToken,
+                                    BlackListRefreshToken, RefreshToken)
 from database.models.users import User
-from database.models.tokens import RefreshToken, BlackListRefreshToken, BlackListAccessToken
-from datetime import datetime, timedelta
 from database.settings import get_db
 from fastapi import Depends
 from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 @router_token.post("/login", response_model=TokenResponse)
