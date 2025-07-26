@@ -1,7 +1,7 @@
 from api.auth import get_current_user
 from api.exceptions.error_500 import ExceptionSaveDataBase
 from api.functions import get_user_social_networks, return_user_social_networks
-from api.pydantic_models.users.request_models import UserCreate
+from api.pydantic_models.users.request_models import UserCreate, UserPasswordRequest
 from api.pydantic_models.users.response_models import (
     UserResponse, UserResponseWithSocialNetwork)
 from api.routers.routers import router_user
@@ -26,8 +26,7 @@ async def create_user(
     user = User(**form_data.model_dump())
 
     session.add(user)
-    password = user.password
-    await user.set_password(password)
+    await user.set_password()
 
     try:
         await session.commit()
@@ -40,13 +39,16 @@ async def create_user(
 
 @router_user.get("/me", response_model=UserResponseWithSocialNetwork)
 async def user_me(
-    session: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    user: UserResponseWithSocialNetwork = Depends(get_user_social_networks)
 ):
-    return await get_user_social_networks(
-        user_id=current_user.id,
-        session=session
-    )
+    return user
+
+
+@router_user.get("/{user_id}", response_model=UserResponseWithSocialNetwork)
+async def get_user(
+    user: UserResponseWithSocialNetwork = Depends(get_user_social_networks)
+):
+    return user
 
 
 @router_user.get("/", response_model=list[UserResponseWithSocialNetwork])
@@ -67,13 +69,18 @@ async def get_users(
     ]
 
 
-@router_user.get("/{user_id}", response_model=UserResponseWithSocialNetwork)
-async def get_user(
-    user_id: int,
-    session: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+@router_user.patch("/set_password", status_code=204)
+async def set_password(
+    form_data: UserPasswordRequest,
+    current_user: User = Depends(get_current_user),
+    session: AsyncSession = Depends(get_db)
 ):
-    return await get_user_social_networks(
-        user_id=user_id,
-        session=session
-    )
+    await current_user.check_password(form_data.current_password)
+    current_user.password = form_data.new_password
+    await current_user.set_password()
+
+    try:
+        await session.commit()
+    except IntegrityError as e:
+        await session.rollback()
+        raise ExceptionSaveDataBase(error=e)

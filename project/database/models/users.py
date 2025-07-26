@@ -17,10 +17,17 @@ class User(Model):
     social_networks = relationship(
         "SocialNetwork", back_populates="user"
     )
+    refresh_token = relationship("RefreshToken", back_populates="user")
+    black_list_refresh_token = relationship(
+        "BlackListRefreshToken", back_populates="user"
+    )
+    black_list_access_token = relationship(
+        "BlackListAccessToken", back_populates="user"
+    )
     is_admin: Mapped[bool] = mapped_column(Boolean, default=False)
 
-    async def set_password(self, password: str):
-        self.password = context.hash(password)
+    async def set_password(self):
+        self.password = context.hash(self.password)
 
     async def check_password(self, password: str):
         return context.verify(password, self.password)

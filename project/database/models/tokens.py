@@ -20,17 +20,18 @@ class BaseRefreshToken(Model):
 class RefreshToken(BaseRefreshToken):
     __tablename__ = "refreshtoken"
 
-    pass
+    user = relationship("User", back_populates="refresh_token")
 
 
 class BlackListRefreshToken(BaseRefreshToken):
     __tablename__ = "blacklistrefreshtoken"
 
-    pass
+    user = relationship("User", back_populates="black_list_refresh_token")
 
 
 class BlackListAccessToken(Model):
     __tablename__ = "blacklistaccesstoken"
 
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
-    access_toren: Mapped[str] = mapped_column(String(400), unique=True)
+    user = relationship("User", back_populates="black_list_access_token")
+    access_token: Mapped[str] = mapped_column(String(400), unique=True)

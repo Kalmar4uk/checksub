@@ -6,11 +6,12 @@ from api.exceptions.error_401 import NotAuth, NotValidToken
 from api.exceptions.error_403 import NotRights
 from api.exceptions.error_404 import UserNotFound
 from database.models.users import User
+from database.models.tokens import BlackListAccessToken
 from database.settings import get_db
 from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer, SecurityScopes
 from jwt.exceptions import InvalidTokenError
-from sqlalchemy import select
+from sqlalchemy import select, exists
 from sqlalchemy.ext.asyncio import AsyncSession
 
 oauth2_scheme = OAuth2PasswordBearer(
@@ -57,22 +58,37 @@ def get_access_and_refresh_tokens(data: dict) -> str:
     return access_token, refresh_token
 
 
-async def get_current_user(
-        scopes: SecurityScopes,
+async def check_access_token(
         token: str = Depends(oauth2_scheme),
         session: AsyncSession = Depends(get_db)
-) -> User:
-    """Проверка токена пользователя"""
+) -> dict:
+    """Поиск и чтение токена"""
     if not token:
         raise NotAuth()
     try:
-        payload = jwt.decode(
+        payload: dict = jwt.decode(
             token,
             settings.SECRET_KEY_JWT,
             algorithms=[settings.ALGORITHM]
         )
     except InvalidTokenError:
         raise NotValidToken()
+
+    query = await session.execute(
+        select(exists().where(BlackListAccessToken.access_token == token))
+    )
+    if query.scalar():
+        raise NotValidToken()
+
+    return payload
+
+
+async def get_current_user(
+        scopes: SecurityScopes,
+        payload: dict = Depends(check_access_token),
+        session: AsyncSession = Depends(get_db)
+) -> User:
+    """Проверка токена пользователя"""
 
     email: str = payload.get("sub")
     if not email:
@@ -82,7 +98,6 @@ async def get_current_user(
         for scope in scopes.scopes:
             if scope not in token_scopes:
                 raise NotRights()
-
     try:
         query = await session.execute(select(User).filter_by(email=email))
         user = query.scalar()

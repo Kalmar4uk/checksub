@@ -1,12 +1,19 @@
 import os
+import sys
 
 from api.routers import social_networks, tokens, users
 from api.routers.routers import (router_social_network, router_token,
                                  router_user)
 from dotenv import load_dotenv
+from pathlib import Path
 from fastapi import FastAPI
 
 load_dotenv()
+
+BASE_DIR = Path(__file__).resolve().parent
+
+if str(BASE_DIR) not in sys.path:
+    sys.path.append(str(BASE_DIR))
 
 # FastApi init
 app = FastAPI(root_path="/api")
