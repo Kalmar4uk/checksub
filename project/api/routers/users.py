@@ -1,4 +1,5 @@
 from api.auth import get_current_user
+from api.exceptions.error_404 import UserNotFound
 from api.exceptions.error_500 import ExceptionSaveDataBase
 from api.functions import get_user_social_networks, return_user_social_networks
 from api.pydantic_models.users.request_models import (UserCreate,
@@ -9,7 +10,7 @@ from api.routers.routers import router_user
 from api.utils import check_unique_email
 from database.models.users import User
 from database.settings import get_db
-from fastapi import Depends
+from fastapi import Depends, Query
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -54,19 +55,33 @@ async def get_user(
 
 @router_user.get("/", response_model=list[UserResponseWithSocialNetwork])
 async def get_users(
+    username: str = Query("all", description="Указать логин пользователя"),
     session: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    query = select(User).options(
-        selectinload(User.social_networks)
-    )
-    users = await session.execute(query)
+    if username == "all":
+        query = await session.execute(
+            select(User).options(
+                selectinload(User.social_networks)
+            )
+        )
+        result = query.scalars().all()
+    else:
+        query = await session.execute(
+            select(User).options(
+                selectinload(User.social_networks)
+            ).where(User.email == username)
+        )
+        result = query.scalar()
+
+        if not result:
+            raise UserNotFound(email=username)
 
     return [
         UserResponseWithSocialNetwork.from_orm(
             user,
             social_networks=await return_user_social_networks(user=user)
-        ) for user in users.scalars().all()
+        ) for user in result
     ]
 
 

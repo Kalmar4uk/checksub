@@ -1,19 +1,24 @@
 import json
 from datetime import datetime
 
+import requests
 from api.auth import get_current_user
 from api.exceptions.error_404 import SocialNetworkNotFound, UserNotFound
 from api.exceptions.error_422 import CountFollowersOrLikesMoreZero
+from api.exceptions.error_500 import ExceptionSaveDataBase
 from api.pydantic_models.social_networks.response_models import \
     SocialNetworkResponse
 from api.pydantic_models.users.response_models import \
     UserResponseWithSocialNetwork
 from api.utils import get_redis
+from celery_app.urls import check_user_vk, headers_vk
 from database.models.social_network import SocialNetwork
 from database.models.users import User
-from database.settings import get_db
+from database.settings import async_session_maker, get_db
 from fastapi import Depends
 from redis import Redis
+from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
@@ -93,3 +98,53 @@ async def return_user_social_networks(user: User):
     ]
 
     return social_networks
+
+
+async def check_existence(username: str, title: str):
+    if title == "VK":
+        if not await check_vk(username=username):
+            return False
+        return await get_or_create_social_network(
+            username=username,
+            title=title
+        )
+
+
+async def check_vk(username: str):
+    response = requests.get(
+        check_user_vk.format(username),
+        headers=headers_vk
+    ).json()
+    if (
+        not response.get("response")
+        or response.get("response")[0].get("deactivated")
+    ):
+        return False
+    return True
+
+
+async def get_or_create_social_network(
+        title: str,
+        username: str
+):
+    async with async_session_maker() as session:
+        query = await session.execute(
+            select(SocialNetwork).where(
+                SocialNetwork.title == title,
+                SocialNetwork.username_network == username
+            )
+        )
+        if (result := query.scalar()):
+            return result
+        else:
+            social_network = SocialNetwork(
+                title=title,
+                username_network=username
+            )
+            session.add(social_network)
+            try:
+                await session.commit()
+            except IntegrityError as e:
+                await session.rollback()
+                raise ExceptionSaveDataBase(error=e)
+            return social_network

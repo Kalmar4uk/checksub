@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field, field_validator
 class SocialNetworkForCreate(BaseModel):
     """Модель для добавления социальной сети"""
     title: str = Field(
-        examples=["Y"],
+        examples=["YouTube"],
         description=(
             "Поле принимает тип социальной сети "
             "YouTube, VK, TikTok, Twitch")

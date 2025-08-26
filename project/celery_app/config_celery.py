@@ -8,6 +8,13 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+DATABASE_URL = (
+    f"postgresql://"
+    f"{os.getenv('POSTGRES_USER')}:"
+    f"{os.getenv('POSTGRES_PASSWORD')}"
+    f"@localhost:5432/{os.getenv('POSTGRES_DB')}"
+)
+
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.append(str(PROJECT_ROOT))
